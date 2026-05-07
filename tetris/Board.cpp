@@ -43,27 +43,26 @@ void Board::InitMap() {//初始化地图
 void Board::Draw() {// 绘制函数
     // 1. 先把光标移到屏幕左上角 (0,0)，准备覆盖旧画面
     SetPos(0, 0);
-
-    std::string outputBuffer = ""; // 字符串缓冲区
-
-    // 2. 在内存中拼接画面
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     for (int y = 0; y < HEIGHT; y++) {
         for (int x = 0; x < WIDTH; x++) {
             switch (map[x][y]) {
-            case 0: outputBuffer += "□"; break; // 空白
-            case 1: case -1: outputBuffer += "■"; break; // 方块
-            case 2: outputBuffer += "─"; break; // 下边界
-            case 3: outputBuffer += "│"; break; // 左边界
-            case 4: outputBuffer += "─"; break; // 上边界
-            case 5: outputBuffer += "│\n"; break; // 右边界
-            case 6: outputBuffer += "┌"; break; // 左上角
-            case 7: outputBuffer += "┘\n"; break; // 右下角
-            case 8: outputBuffer += "┐\n"; break; // 右上角
-            case 9: outputBuffer += "└"; break; // 左下角
+            case 0: 
+                SetConsoleTextAttribute(hConsole, 8);
+                std::cout <<"□"; 
+                SetConsoleTextAttribute(hConsole, 7);
+                break; // 空白
+            case 1: case -1:std::cout << "■"; break; // 方块
+            case 2:std::cout << "─"; break; // 下边界
+            case 3: std::cout << "│"; break; // 左边界
+            case 4: std::cout << "─"; break; // 上边界
+            case 5: std::cout << "│\n"; break; // 右边界
+            case 6: std::cout << "┌"; break; // 左上角
+            case 7: std::cout << "┘\n"; break; // 右下角
+            case 8: std::cout << "┐\n"; break; // 右上角
+            case 9: std::cout << "└"; break; // 左下角
             }
         }
     }
-    // 3. 一次性输出到控制台 (极大减少闪烁)
-    std::cout << outputBuffer;
     std::cout.flush(); // 确保立即输出
 }
