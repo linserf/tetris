@@ -34,7 +34,7 @@ int main() {
             timeAccumulated -= DROP_INTERVAL;//减去执行时间
         }
         if (c.ClearLine()) {//消除行
-            timeAccumulated -= 3;
+            timeAccumulated -= 1;
         }
         if (dt * 1000 < FRAME_DELAY) {//保护cpu
             Sleep(FRAME_DELAY - (unsigned long)(dt * 1000));

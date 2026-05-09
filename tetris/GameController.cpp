@@ -9,7 +9,7 @@
 void GameController::InitGame() {//初始化游戏（初始化map，隐藏光标，绘制map）
 	board.InitMap();
 	board.HideCursor();
-	board.Draw();
+	board.Draw(true);
 }
 
 
@@ -22,7 +22,7 @@ void GameController::Spawn() {//生成新的Tetromino，并移动至地图上方
     int randomIndex = random_num % tetrominosList.size();
 	currentTetromino.InitTetromino(tetrominosList[randomIndex]);
 	currentTetromino.moveto(6,1);
-	render(board,currentTetromino);
+	render(board,currentTetromino,true);
 
 }
 void GameController::Drop() {//Tetromino下落
@@ -30,7 +30,7 @@ void GameController::Drop() {//Tetromino下落
 	if (!currentTetromino.isValid()) {
 		currentTetromino.move(0, -1);
 	}
-	render(board, currentTetromino);
+	render(board, currentTetromino,true);
 }
 bool GameController::Fixed() {//Tetromino落到最低端或是接触到以fixed的Tetromino时在map上绘制信息
 	bool isbottom=false;
@@ -90,31 +90,49 @@ bool GameController::isClearLine(int y) {//判断是否有可以消除的行
 	return true;
 }
 bool GameController::ClearLine() {//消除行
-	bool canClear = false;
-	int targetY = 0;
+  // Determine all clearable rows (playable rows: 1 .. HEIGHT-2)
+	std::vector<bool> clearRow(HEIGHT, false);
+	int clearCount = 0;
 	for (int y = HEIGHT - 2; y > 0; y--) {
 		if (isClearLine(y)) {
-			canClear = true;
-			targetY = y;
+			clearRow[y] = true;
+			clearCount++;
 		}
 	}
-	if (canClear) {
-		HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-		for (int i = 0; i < 2; i++) {
-			SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-            render(board, currentTetromino);
-			Sleep(500);
-			SetConsoleTextAttribute(hConsole, 7);
-			render(board, currentTetromino);
-			Sleep(500);
-		}
-		for (int y = targetY; y > 0; y--) {
-			for (int x = 1; x < WIDTH-1; x++) {
-				if (map[x][y] == -1) {
-					map[x][y] = map[x][y - 1];
-				}
+	combo = clearCount;
+	switch (combo) {
+	case 1: score += 100; break;
+	case 2: score += 300; break;
+	case 3: score += 500; break;
+	case 4: score += 800; break;
+	}
+	if (clearCount == 0) return false;
+
+	// Blink effect for cleared lines
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	for (int i = 0; i < 2; i++) {
+		SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+		render(board, currentTetromino,false);
+		Sleep(200);
+		SetConsoleTextAttribute(hConsole, 7);
+		render(board, currentTetromino,false);
+		Sleep(200);
+	}
+
+
+	// Build new column data for playable columns only, pushing non-cleared rows down
+	for (int x = 1; x < WIDTH-1; x++) {
+		int writeY = HEIGHT - 2; // start from bottom playable row
+		for (int y = HEIGHT - 2; y > 0; y--) {
+			if (!clearRow[y]) {
+				map[x][writeY] = map[x][y];
+				writeY--;
 			}
 		}
+		// fill remaining rows at top with empty
+		for (int y = writeY; y > 0; y--) {
+			map[x][y] = 0;
+		}
 	}
-    return canClear;
+	return true;
 }

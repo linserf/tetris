@@ -142,8 +142,10 @@ void Tetromino::cast() {
         // 注意：这里通常只检查 mapY >= 0，因为方块可能在屏幕上方生成 (mapY < 0)
         if (mapX >= 0 && mapX < WIDTH && mapY >= 0 && mapY < HEIGHT) {
             // 4. 写入地图
-            // 这里写 1，或者写 this->type 来记录方块类型/颜色
-            map[mapX][mapY] = 1;
+            // 这里只在当前位置不是已固定方块(-1)时写入活动方块标记，避免覆盖已固定方块
+            if (map[mapX][mapY] != -1) {
+                map[mapX][mapY] = 1;
+            }
         }
     }
 }

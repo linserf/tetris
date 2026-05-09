@@ -1,2 +1,2 @@
 #pragma once
-void render(Board& b,Tetromino& t);
+void render(Board& b,Tetromino& t,bool color);
