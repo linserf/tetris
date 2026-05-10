@@ -1,6 +1,7 @@
 #include "Tetromino.h"
 #include "Board.h"
 #include <utility>
+#include"GameController.h"
 const std::vector<std::pair<int, int>> KICK_TESTS = {
     {0, 0},   // 1. 原位尝试
     {1, 0},   // 2. 向右踢 1格
@@ -9,7 +10,48 @@ const std::vector<std::pair<int, int>> KICK_TESTS = {
     {2, 0},   // 5. 向右踢 2格 (针对长条I方块贴墙的情况)
     {-2, 0}   // 6. 向左踢 2格
 };
-void Tetromino::InitTetromino(TetrominoType type) {//初始化Tetromino（根据输入的类型绘制）
+bool Tetromino::InitTetromino(TetrominoType type) {//初始化Tetromino（根据输入的类型绘制）
+    if (map[6][1] != 0) {
+        isGameOver = true;
+        return false; // 无法生成新方块，游戏结束
+	}
+    relativeCoords.clear();
+    Tetromino::type = type;
+
+    // 以方块自身的逻辑中心为 (0,0) 来定义相对坐标
+    switch (type) {
+    case TetrominoType::I:
+        // I 形方块，中心在 (1.5, 1.5)，我们用整数坐标近似
+        relativeCoords = { {-1, 0}, {0, 0}, {1, 0}, {2, 0} };
+        break;
+    case TetrominoType::O:
+        // O 形方块，不需要旋转
+        relativeCoords = { {0, 0}, {1, 0}, {0, 1}, {1, 1} };
+        break;
+    case TetrominoType::T:
+        // T 形方块，中心在 (1, 1)
+        relativeCoords = { {-1, 0}, {0, 0}, {1, 0}, {0, 1} };
+        break;
+    case TetrominoType::L:
+        // L 形方块，中心在 (1, 1)
+        relativeCoords = { {-1, 0}, {0, 0}, {1, 0}, {1, 1} };
+        break;
+    case TetrominoType::J:
+        // J 形方块，中心在 (1, 1)
+        relativeCoords = { {-1, 0}, {0, 0}, {1, 0}, {-1, 1} };
+        break;
+    case TetrominoType::Z:
+        // Z 形方块，中心在 (1, 1)
+        relativeCoords = { {-1, 0}, {0, 0}, {0, 1}, {1, 1} };
+        break;
+    case TetrominoType::S:
+        // S 形方块，中心在 (1, 1)
+        relativeCoords = { {0, 0}, {1, 0}, {-1, 1}, {0, 1} };
+        break;
+    }
+	return true;
+}
+void Tetromino::InitnextTetromino(TetrominoType type) {//初始化Tetromino（根据输入的类型绘制）
     relativeCoords.clear();
     Tetromino::type = type;
 
@@ -149,3 +191,17 @@ void Tetromino::cast() {
         }
     }
 }
+void Tetromino::nextcast() {
+    int x, y;
+    for (x = 20; x < 30; x++) {
+        for (y = 13; y < 17; y++) {
+            map[x][y] = -2;
+        }
+    }
+    for (const auto& block : relativeCoords) {
+        int mapX = 23 + block.x;
+        int mapY = 14 + block.y;
+        map[mapX][mapY] = -3;
+    }
+}
+

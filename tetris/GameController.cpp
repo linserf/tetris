@@ -6,23 +6,39 @@
 #include<conio.h>
 #include<Windows.h>
 #include<random>
+#include<algorithm>
 void GameController::InitGame() {//初始化游戏（初始化map，隐藏光标，绘制map）
 	board.InitMap();
 	board.HideCursor();
 	board.Draw(true);
 }
-
-
-void GameController::Spawn() {//生成新的Tetromino，并移动至地图上方
-	std::vector<TetrominoType> tetrominosList = { TetrominoType::I, TetrominoType::J, TetrominoType::L, TetrominoType::O, TetrominoType::S, TetrominoType::T, TetrominoType::Z };
+void GameController::initlist() {
 	std::random_device rd;
 	std::mt19937 gen(rd());
-	std::uniform_int_distribution<> distrib(1, 100); 
-	int random_num = distrib(gen);
-    int randomIndex = random_num % tetrominosList.size();
-	currentTetromino.InitTetromino(tetrominosList[randomIndex]);
-	currentTetromino.moveto(6,1);
-	render(board,currentTetromino,true);
+	std::shuffle(tetrominosList.begin(), tetrominosList.end(), gen);
+	currentTetrominoType = tetrominosList.begin();
+}
+
+bool GameController::Spawn() {//生成新的Tetromino，并移动至地图上方
+	if (currentTetrominoType == tetrominosList.end()) {
+		initlist();
+	}
+	if (currentTetromino.InitTetromino(*currentTetrominoType)) {
+		currentTetromino.moveto(6, 1);
+		render(board, currentTetromino, nextTetromino, true);
+		currentTetrominoType++;
+		if (currentTetrominoType == tetrominosList.end()) {
+			initlist();
+		}
+		nextTetromino.InitnextTetromino(*currentTetrominoType);
+		render(board, currentTetromino, nextTetromino, true);
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+
 
 }
 void GameController::Drop() {//Tetromino下落
@@ -30,7 +46,7 @@ void GameController::Drop() {//Tetromino下落
 	if (!currentTetromino.isValid()) {
 		currentTetromino.move(0, -1);
 	}
-	render(board, currentTetromino,true);
+	render(board, currentTetromino, nextTetromino,true);
 }
 bool GameController::Fixed() {//Tetromino落到最低端或是接触到以fixed的Tetromino时在map上绘制信息
 	bool isbottom=false;
@@ -77,6 +93,7 @@ void GameController::KeyboardControl() {//获取键盘输入，进行相应的操作
 		case 's': // 加速下落
 			currentTetromino.move(0, 1);
 			break;
+			
 		}
 	}
 
@@ -112,10 +129,10 @@ bool GameController::ClearLine() {//消除行
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	for (int i = 0; i < 2; i++) {
 		SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-		render(board, currentTetromino,false);
+		render(board, currentTetromino,nextTetromino,false);
 		Sleep(200);
 		SetConsoleTextAttribute(hConsole, 7);
-		render(board, currentTetromino,false);
+		render(board, currentTetromino, nextTetromino,false);
 		Sleep(200);
 	}
 

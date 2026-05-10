@@ -3,6 +3,7 @@
 #include<vector>
 #include"Board.h"
 #include"GameController.h"
+#include<iomanip>
 
 void Board::SetPos(int x, int y) {
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE); // 获取标准输出句柄
@@ -18,7 +19,7 @@ void Board::HideCursor() {
 void Board::InitMap() {//初始化地图
     for (int y = 0; y < HEIGHT; y++) {
         for (int x = 0; x < AWIDTH; x++) {
-            if (map[x][y] != -1) {
+            if (map[x][y] != -1 && map[x][y] != -3 && map[x][y] != 14) {
                 map[x][y] = -2;
             }
         }
@@ -51,8 +52,8 @@ void Board::InitMap() {//初始化地图
     map[20][2] = 11;
 	map[19][5] = 12;
 	map[20][6] = 13;
-	map[20][10] = 14;
-	map[21][17] = 15;
+	map[21][18] = 15;
+    map[19][12] = 16;
     //输出菜单
 }
 void Board::Draw(bool color) {// 绘制函数
@@ -73,7 +74,7 @@ void Board::Draw(bool color) {// 绘制函数
                     std::cout << "□";
                 }
                 break; // 空白
-            case 1: case -1:std::cout << "■"; break; // 方块
+            case 1: case -1:case -3:std::cout << "■"; break; // 方块
             case 2:std::cout << "─"; break; // 下边界
             case 3: std::cout << "│"; break; // 左边界
             case 4: std::cout << "─"; break; // 上边界
@@ -85,8 +86,9 @@ void Board::Draw(bool color) {// 绘制函数
             case 10: std::cout << "linserf's:"; break;
             case 11: std::cout << "Tetris"; break;
             case 12: std::cout << "Score:"; break;
-            case 13: std::cout << score; break;
+            case 13: std::cout << std::setfill('0') << std::setw(10) << score; break;
             case 14: std::cout << "Game Over"; break;
+            case 16: std::cout << "next:"; break;
             case 15:
                 switch (combo) {
 				case 0: std::cout << ""; break;
