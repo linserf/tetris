@@ -51,6 +51,7 @@ a:
         if (c.ClearLine()) {//消除行
             timeAccumulated -= 1;
         }
+		render(c.board, c.currentTetromino, c.nextTetromino, true);//渲染游戏界面
         if (dt * 1000 < FRAME_DELAY) {//保护cpu
             Sleep(FRAME_DELAY - (unsigned long)(dt * 1000));
         }
